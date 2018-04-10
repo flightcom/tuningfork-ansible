@@ -1,0 +1,9 @@
+---
+# deploy.yml
+
+- hosts: web
+  become: yes
+  become_user: "{{ web_user }}"
+  roles:
+    - deploy-api
+    - deploy-admin

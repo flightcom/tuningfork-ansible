@@ -1,0 +1,42 @@
+---
+
+- name: Install supervisor
+  become: yes
+  apt:
+    pkg: supervisor
+    state: present
+    update_cache: true
+  notify:
+    - start supervisord
+  tags: supervisor
+
+- name: Configure supervisord
+  become: yes
+  template:
+    src: supervisord.conf.j2
+    dest: "{{ supervisor_dir }}/supervisord.conf"
+  notify:
+    - restart supervisord
+  tags: supervisor
+
+- name: Import environment variable
+  become: yes
+  lineinfile:
+    path: /etc/default/supervisor
+    regexp: '^\. \/etc\/environment'
+    line: '. /etc/environment'
+  tags: supervisor
+
+- name: Create {{ supervisor_config_dir }} directory
+  become: yes
+  file:
+    path: "{{ supervisor_config_dir }}"
+    state: directory
+  tags: supervisor
+
+- name: Ensure supervisord is running
+  become: yes
+  service:
+    name: supervisor
+    state: restarted
+  tags: supervisor

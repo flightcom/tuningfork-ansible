@@ -1,0 +1,14 @@
+---
+# file: roles/php/handlers/main.yml
+
+- name: Restart php56-fpm
+  become: yes
+  service: name=php5-fpm state=restarted
+
+- name: Restart php70-fpm
+  become: yes
+  service: name=php7.0-fpm state=restarted
+
+- name: Restart php72-fpm
+  become: yes
+  service: name=php7.2-fpm state=restarted

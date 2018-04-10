@@ -1,0 +1,22 @@
+---
+# file: roles/php/tasks/main.yml
+
+- include: php56.yml
+  when: php_version is defined and php_version == '5.6'
+  tags: php
+
+- include: php72.yml
+  when: php_version == '7.2' or php_version is undefined
+  tags: php
+
+- name: PHP | Ensure Composer installer is up-to-date
+  become: yes
+  get_url: url=https://getcomposer.org/installer dest=/root/composer-installer mode=u=rw,g=r,o=r
+  register: composer
+  tags: php
+
+- name: PHP | Ensure Composer is up-to-date
+  become: yes
+  shell: php /root/composer-installer --install-dir=/usr/local/bin --filename=composer
+  when: composer.changed
+  tags: php

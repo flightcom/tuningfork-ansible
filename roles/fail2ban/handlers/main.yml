@@ -1,0 +1,10 @@
+---
+# file: roles/fail2ban/handlers/main.yml
+
+- name: Restart fail2ban
+  become: yes
+  service: name=fail2ban state=restarted
+
+- name: Reload fail2ban
+  become: yes
+  service: name=fail2ban state=reloaded

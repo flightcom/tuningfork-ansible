@@ -1,0 +1,7 @@
+---
+# roles/deploy/handlers/main.yml
+
+- name: Restart Nginx
+  command:
+    sudo /usr/sbin/service nginx restart
+    warn=False

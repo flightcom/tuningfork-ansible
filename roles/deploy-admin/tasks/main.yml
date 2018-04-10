@@ -1,0 +1,96 @@
+---
+# roles/deploy/tasks/main.yml
+
+##
+# Init deployment
+##
+
+- name: Initialize the deploy root directory and gather facts
+  deploy_helper:
+    path={{ deploy_dir_admin }}
+
+- name: Ensure new release dir exist
+  file:
+    path={{ deploy_helper.new_release_path }}
+    state=directory
+
+##
+# Clone project
+##
+
+- name: Ensure SSH deploy key exists
+  user:
+    name: "{{ deploy_user }}"
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa_admin
+
+- name: Clone project
+  git:
+    repo: "{{ project_repo_admin }}"
+    dest: "{{ deploy_helper.new_release_path }}"
+    version: "{{ version_admin | default('master') }}"
+    accept_hostkey: yes
+    recursive: "{{ project_clone_submodules | default('no') }}"
+    key_file: .ssh/id_rsa_admin
+
+- name: Add an unfinished file, to allow cleanup on successful finalize
+  file:
+    path={{ deploy_helper.new_release_path }}/{{ deploy_helper.unfinished_filename }}
+    state=touch
+
+##
+# Config
+##
+
+- name: Setting up .env file
+  template:
+    src=env.j2
+    dest={{ deploy_helper.new_release_path }}/app/env.js
+
+##
+# Dependencies
+##
+
+- name: yarn
+  command:
+    yarn
+    chdir={{ deploy_helper.new_release_path }}
+
+- name: yarn build
+  command:
+    yarn build
+    chdir={{ deploy_helper.new_release_path }}
+
+##
+# Symlinks
+##
+
+- name: Ensure required shared folders exists
+  file:
+    path={{ deploy_helper.shared_path }}/{{ item.src }}
+    state=directory
+  with_items: "{{ shared_folders }}"
+  when: shared_folders is defined and shared_folders is not none
+
+- name: Add symlinks from the new release to the shared folder
+  file:
+    path='{{ deploy_helper.new_release_path }}/{{ item.path }}'
+    src='{{ deploy_helper.shared_path }}/{{ item.src }}'
+    state=link
+    force=yes
+  with_items: "{{ shared_folders }}"
+  when: shared_folders is defined and shared_folders is not none
+
+##
+# Finalize
+##
+
+- name: Finalize the deploy, remove the unfinished file and switch the symlink
+  deploy_helper:
+    path={{ deploy_dir_admin }}
+    release={{ deploy_helper.new_release }}
+    state=finalize
+    keep_releases={{ release_number_to_keep }}
+  notify:
+    - Restart Nginx

@@ -1,0 +1,65 @@
+# !/bin/bash
+
+# {{ ansible_managed }}
+
+##
+# Ensure current firewall tables are empty
+##
+iptables -P INPUT ACCEPT
+ip6tables -P INPUT ACCEPT
+
+iptables -P OUTPUT ACCEPT
+ip6tables -P OUTPUT ACCEPT
+
+iptables -t filter -F
+ip6tables -t filter -F
+
+iptables -t filter -X
+ip6tables -t filter -X
+
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+{% if iptables_custom_rules is defined %}
+##
+# Custom rules
+# Custom rules are more important than general rules, this block should be
+# before any other one
+##
+{% for rule in iptables_custom_rules %}
+{{ rule }}
+{% endfor %}
+{% endif %}
+
+##
+# Ensure loopback and ping are authorized
+##
+iptables -t filter -A INPUT -i lo -j ACCEPT
+ip6tables -t filter -A INPUT -i lo -j ACCEPT
+
+iptables -t filter -A INPUT -p icmp -j ACCEPT
+ip6tables -t filter -A INPUT -p icmpv6 -j ACCEPT
+
+##
+# Ensure SSH port is open
+##
+iptables -t filter -A INPUT -p tcp -s '{{osedea_ip}}' --dport '{{ ssh_port }}' -j ACCEPT
+iptables -t filter -A INPUT -p tcp -s '{{osd_vpn_ip}}' --dport '{{ ssh_port }}' -j ACCEPT
+ip6tables -t filter -A INPUT -p tcp --dport '{{ ssh_port }}' -j DROP # No IPV6 connection
+
+
+##
+# Ensure other incomming connections are blocked
+##
+iptables -t filter -P INPUT DROP
+ip6tables -t filter -P INPUT DROP
+
+iptables -t filter -P FORWARD DROP
+ip6tables -t filter -P FORWARD DROP
+
+##
+# Ensure IPV6 is disabled
+##
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 1 > /proc/sys/net/ipv6/conf/lo/disable_ipv6
+echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6

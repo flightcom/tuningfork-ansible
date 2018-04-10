@@ -1,0 +1,85 @@
+---
+# file: roles/project/tasks/main.yml
+
+##
+# Web users
+##
+- name: Create user who run the project
+  become: yes
+  user:
+    name: "{{  web_user }}"
+    shell: /bin/bash
+    groups: www-data
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+  tags: project
+
+- name: Ensure only the owner and users in www-data group could read web user home and data
+  become: yes
+  file:
+    path: "/home/{{ web_user }}"
+    group: www-data
+    mode: 0750
+  tags: project
+
+- name: Ensure users can restart Nginx
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service nginx'
+    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service nginx restart'
+    validate: 'visudo -cf %s'
+  tags: project
+
+- name: Ensure users can restart php5-fpm
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service php5'
+    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service php5-fpm restart'
+    validate: 'visudo -cf %s'
+  when: php_version is defined and php_version == '5.6'
+  tags: project"
+
+- name: Ensure users can restart php7.0-fpm
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service php7.0'
+    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service php7.0-fpm restart'
+    validate: 'visudo -cf %s'
+  when: php_version == '7.0' or php_version is undefined
+  tags: project
+
+##
+# Dependencies
+##
+- name: Ensure dependencies are installed
+  become: yes
+  apt: pkg={{ item }} state=latest
+  with_items: "{{ project_dependencies|default([]) }}"
+  tags:
+    - project
+    - dependencies
+
+- name: Ensure NPM dependencies are installed
+  become: yes
+  npm: name={{ item }} global=yes
+  with_items: "{{ npm_project_dependencies|default([]) }}"
+  tags:
+    - project
+    - dependencies
+
+##
+# Symlinks
+##
+- name: Ensure required symlinks are present
+  become: yes
+  file: src={{ item.src }} dest={{ item.dst }} state=link
+  with_items: "{{ project_symlinks|default([]) }}"
+  tags:
+    - project
+    - dependencies

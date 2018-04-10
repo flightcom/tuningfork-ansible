@@ -1,0 +1,71 @@
+---
+# file: roles/mysql/tasks/main.yml
+
+##
+# Installation
+##
+- name: Ensure MySQL (MariaDB) is installed
+  become: yes
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - mariadb-server
+    - python-mysqldb
+  tags: mysql
+
+##
+# Check MySQL usernames length
+##
+- name: Ensure MySQL usernames length is less than 13 characters
+  fail: msg="MySQL username length should be less than 13 characters!"
+  when: item.user | length | int >= 13
+  with_items: "{{ mysql_dbs|default([]) }}"
+  tags: mysql
+
+##
+# Configuration & Securisation
+##
+- name: Ensure MySQL is configured
+  become: yes
+  template: src=my.cnf.j2 dest=/etc/mysql/my.cnf backup=yes owner=0 group=0 mode=0644
+  tags: mysql
+  notify: Restart MySQL
+
+
+- name: Update MySQL root password for all root accounts
+  become: yes
+  mysql_user: name="{{ mysql_root_user }}" host="{{ item }}" password="{{ mysql_root_password }}" login_user="{{ mysql_root_user }}" login_password="{{ mysql_root_password }}" check_implicit_admin=yes
+  # host_all: yes # (added in 2.1)
+  when: mysql_root_password is defined
+  with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+  tags: mysql
+
+- name: Remove the MySQL test database
+  become: yes
+  mysql_db: db=test state=absent login_user="{{ mysql_root_user }}" login_password="{{ mysql_root_password }}"
+  when: mysql_root_password is defined
+  tags: mysql
+
+- name: Delete anonymous MySQL server user for localhost
+  become: yes
+  mysql_user: user="" state=absent login_user="{{ mysql_root_user }}" login_password="{{ mysql_root_password }}"
+  when: mysql_root_password is defined
+  tags: mysql
+
+##
+# Databases & Users
+##
+- name: Configure MySQL databases
+  become: yes
+  mysql_db: name="{{ item.database }}" state=present login_user="{{ mysql_root_user }}" login_password="{{ mysql_root_password }}"
+  with_items: "{{ mysql_dbs|default([]) }}"
+  tags: mysql
+
+- name: Configure MySQL users
+  become: yes
+  mysql_user: name='{{ item.user }}' host="{{ item.host|default('localhost') }}" password='{{ item.password }}' priv='{{ item.database }}.*:{{ mysql_production_privileges }}' state=present login_user="{{ mysql_root_user }}" login_password="{{ mysql_root_password }}"
+  with_items: "{{ mysql_dbs|default([]) }}"
+  tags: mysql

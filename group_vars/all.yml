@@ -1,0 +1,11 @@
+---
+
+env: "{{ inventory_dir.split('/')[-1] }}" # Don't change this
+
+# Timezone for all servers
+timezone: "Europe/Paris"
+
+# NTP pool
+ntp_server: pool.ntp.org
+
+# ssh_port: 36220

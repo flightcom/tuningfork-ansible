@@ -1,0 +1,37 @@
+# {{ ansible_managed }}
+
+# TODO
+
+server {
+    server_name admin.tuningfork.fr;
+
+    listen 3000;
+    listen [::]:3000;
+
+    root /home/www-tuningfork/www/admin/current/dist;
+
+    index index.html index.htm;
+
+    charset utf-8;
+
+    client_max_body_size 200M;
+
+    ##
+    # Referrer Policy
+    ##
+    add_header Referrer-Policy "no-referrer";
+
+    location / {
+        try_files $uri $uri/ /index.html?$query_string;
+    }
+
+    location = /robots.txt  {
+        try_files $uri $uri/ /index.php?$query_string;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Log configuration
+    access_log /var/log/nginx/tuningfork-admin_access.log;
+    error_log /var/log/nginx/tuningfork-admin_error.log;
+}

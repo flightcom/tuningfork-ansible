@@ -1,0 +1,3 @@
+---
+# file: roles/mysql/defaults/main.yml
+# default lower priority variables for this role

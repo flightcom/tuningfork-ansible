@@ -1,0 +1,31 @@
+---
+# file: roles/common/tasks/ntp.yml
+
+##
+# NTP
+##
+
+- name: Ensure NTP is installed
+  become: yes
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - ntp
+    - ntpdate
+  tags:
+    - common
+    - ntp
+
+- name: Ensure NTP is configured
+  become: yes
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  notify: Restart NTP
+  tags:
+    - common
+    - ntp
+
+- name: Ensure NTP is running and enabled
+  become: yes
+  service: name=ntp state=started enabled=yes
+  tags:
+    - common
+    - ntp

@@ -1,0 +1,12 @@
+---
+# web.yml
+
+- hosts: web
+  roles:
+    - ssh
+    - common
+    - fail2ban
+    - certbot
+    - project
+    - php
+    - nginx

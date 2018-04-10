@@ -1,0 +1,30 @@
+---
+# file: roles/firewall/tasks/main.yml
+
+- name: Firewall | Ensure iptables-persistent package is installed
+  become: yes
+  apt: pkg=iptables-persistent state=latest
+  tags: firewall
+
+- name: Firewall | Ensure iptables folder exist
+  become: yes
+  file: path=/etc/iptables state=directory owner=root group=root
+  tags: firewall
+
+- name: Firewall | Generate iptables script
+  become: yes
+  template: src=iptables/firewall.j2 dest=/etc/iptables/firewall.sh  owner=0 group=0 mode=u=rwx,g=r,o=r
+  register: firewall
+  notify:
+    - Restart fail2ban
+    - Save firewall rules
+  tags: firewall
+
+- name: Firewall | Apply iptables script
+  become: yes
+  shell: /etc/iptables/firewall.sh
+  when: firewall.changed
+  notify:
+    - Save firewall rules
+    - Restart fail2ban
+  tags: firewall

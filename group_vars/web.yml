@@ -1,0 +1,71 @@
+---
+##
+# Site
+##
+web_user: www-tuningfork
+php_pool: www-tuningfork
+
+##
+# Project
+##
+deploy_user: www-tuningfork
+deploy_dir_api: '/home/www-tuningfork/www/api'
+deploy_dir_admin: '/home/www-tuningfork/www/admin'
+project_repo_api: 'git@github.com:flightcom/tuningfork-api.git'
+project_repo_admin: 'git@github.com:flightocm/tuningfork-admin.git'
+
+project_dependencies:
+
+# Number of release to keep on server
+release_number_to_keep: 5
+
+# project_clone_submodules: false
+# gulp_custom_command: gulp
+
+##
+# Fail2Ban Configuration
+##
+
+# "fail2ban" (REQUIRED)
+# Fail2Ban jail options
+# recidive, ssh and sshDdos jails should always been enabled.
+# commented lines are default values
+#
+fail2ban:
+  jail:
+    recidive:
+      # enabled: true
+    ssh:
+      # enabled: true
+    dropbear:
+      # enabled: false
+    sshDdos:
+      # enabled: true
+    laravelAuth:
+      # enabled: false
+    wpAuth:
+      # enabled: false
+    wpXmlrpc:
+      # enabled: false
+    nginxAuth:
+      # enabled: false
+    nginxDos:
+      # enabled: false
+    nginxLogin:
+      # enabled: false
+    nginxBadbots:
+      # enabled: false
+    nginxNoscript:
+      # enabled: false
+    nginxProxy:
+      # enabled: true
+    apache:
+      # enabled: false
+    apacheMultiport:
+      # enabled: false
+    apacheNoscript:
+      # enabled: false
+    apacheOverflows:
+      # enabled: false
+    openvpn:
+      # enabled: false

@@ -1,0 +1,23 @@
+---
+
+- name: start supervisord
+  become: yes
+  service:
+    name: supervisor
+    state: started
+    enabled: true
+  tags: supervisor
+
+- name: restart supervisord
+  become: yes
+  service:
+    name: supervisor
+    state: restarted
+  tags: supervisor
+
+- name: update supervised service
+  become: yes
+  command: "{{ supervisorctl_command }} update"
+  notify:
+    - restart supervisord
+  tags: supervisor

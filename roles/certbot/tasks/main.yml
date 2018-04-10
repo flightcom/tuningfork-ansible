@@ -1,0 +1,21 @@
+---
+# file: roles/certbot/tasks/main.yml
+
+##
+# Certbot
+##
+- name: Ensure certbot is installed
+  become: yes
+  apt: name=certbot state=latest update_cache=yes
+  when: certbot | default(false) | bool
+  tags: certbot
+
+- name: Update crontab entry
+  become: yes
+  lineinfile:
+    dest: /etc/cron.d/certbot
+    line: 0 */12 * * * root test -x /usr/bin/certbot && perl -e 'sleep int(rand(3600))' && certbot -q renew --renew-hook "{{ certbot_renew_hook | default('/usr/sbin/service nginx reload') }}"
+    state: present
+    regexp: "(certbot -q renew)"
+  when: certbot | default(false) | bool
+  tags: certbot

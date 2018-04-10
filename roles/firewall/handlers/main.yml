@@ -1,0 +1,9 @@
+---
+# file: roles/firewall/handlers/main.yml
+
+- name: Save firewall rules
+  become: yes
+  shell: '{{ item }}'
+  with_items:
+    - iptables-save | tee /etc/iptables/rules.v4
+    - ip6tables-save | tee /etc/iptables/rules.v6

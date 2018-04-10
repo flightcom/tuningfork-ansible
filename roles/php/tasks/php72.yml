@@ -1,0 +1,40 @@
+---
+# file: roles/php/tasks/php72.yml
+
+- name: 7.2 | Add PHP 7.2 repo
+  apt_repository:
+    repo: 'ppa:ondrej/php'
+    update_cache: yes
+
+- name: 7.2 | Ensure PHP 7.2 is installed
+  become: yes
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - php7.2-cli
+    - php7.2-common
+    - php7.2-fpm
+    - php7.2-mysql
+    - php7.2-gd
+    - php7.2-curl
+    - php7.2-intl
+    - php7.2-mbstring
+    - php7.2-dom
+    - php7.2-zip
+  tags: php
+
+- name: 7.2 | Ensure PHP is configured
+  become: yes
+  template: src=fpm/php72.ini.j2 dest=/etc/php/7.2/fpm/php.ini backup=yes owner=0 group=0 mode=0644
+  tags: php
+  notify: Restart php72-fpm
+
+- name: 7.2 | Copy host based php pools
+  become: yes
+  template: src=fpm/pool.j2 dest=/etc/php/7.2/fpm/pool.d/www-tuningfork.conf backup=yes
+  tags: php
+  notify: Restart php72-fpm
+
+- name: 7.2 | Ensure php7.2-fpm is started
+  become: yes
+  service: name=php7.2-fpm state=started
+  tags: php

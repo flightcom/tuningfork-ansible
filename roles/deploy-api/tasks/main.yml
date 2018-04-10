@@ -1,0 +1,127 @@
+---
+# roles/deploy/tasks/main.yml
+
+##
+# Var files
+##
+
+- name: Retrieve env file vars
+  include_vars:
+    file: "{{ vars.inventory_dir }}/host_vars/web.yml"
+    name: env_vars_api
+
+##
+# Init deployment
+##
+
+- name: Initialize the deploy root directory and gather facts
+  deploy_helper:
+    path={{ deploy_dir }}
+
+- name: Ensure new release dir exist
+  file:
+    path={{ deploy_helper.new_release_path }}
+    state=directory
+
+##
+# Clone project
+##
+
+- name: Ensure SSH deploy key exists
+  user:
+    name: "{{ deploy_user }}"
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa_api
+
+- name: Clone project
+  git:
+    repo: "{{ project_repo }}"
+    dest: "{{ deploy_helper.new_release_path }}"
+    version: "{{ version_api | default('master') }}"
+    accept_hostkey: yes
+    recursive: "{{ project_clone_submodules | default('no') }}"
+    key_file: .ssh/id_rsa_api
+
+- name: Add an unfinished file, to allow cleanup on successful finalize
+  file:
+    path={{ deploy_helper.new_release_path }}/{{ deploy_helper.unfinished_filename }}
+    state=touch
+
+##
+# Config
+##
+
+- name: Setting up .env file
+  template:
+    src=.env.j2
+    dest={{ deploy_helper.new_release_path }}/.env
+
+##
+# Dependencies
+##
+
+- name: composer install
+  shell: composer install
+    chdir={{ deploy_helper.new_release_path }}
+
+- name: yarn
+  command:
+    yarn
+    chdir={{ deploy_helper.new_release_path }}
+
+- name: gulp build
+  command:
+    ./node_modules/gulp/bin/gulp.js
+    chdir={{ deploy_helper.new_release_path }}
+
+##
+# Symlinks
+##
+
+- name: Ensure required shared folders exists
+  file:
+    path={{ deploy_helper.shared_path }}/{{ item.src }}
+    state=directory
+  with_items: "{{ shared_folders }}"
+  when: shared_folders is defined and shared_folders is not none
+
+- name: Add symlinks from the new release to the shared folder
+  file:
+    path='{{ deploy_helper.new_release_path }}/{{ item.path }}'
+    src='{{ deploy_helper.shared_path }}/{{ item.src }}'
+    state=link
+    force=yes
+  with_items: "{{ shared_folders }}"
+  when: shared_folders is defined and shared_folders is not none
+
+##
+# DB Migrations
+##
+- name: php artisan migrate --force
+  command:
+    php artisan migrate --force
+    chdir={{ deploy_helper.new_release_path }}
+
+##
+# Seed DB
+##
+- name: php artisan db:seed --force
+  command:
+    php artisan db:seed --force
+    chdir={{ deploy_helper.new_release_path }}
+
+##
+# Finalize
+##
+
+- name: Finalize the deploy, remove the unfinished file and switch the symlink
+  deploy_helper:
+    path={{ deploy_dir }}
+    release={{ deploy_helper.new_release }}
+    state=finalize
+    keep_releases={{ release_number_to_keep }}
+  notify:
+    - Restart Nginx
+    - Restart php5-fpm
+    - Restart php7.2-fpm

@@ -1,0 +1,79 @@
+---
+# file: roles/nginx/tasks/main.yml
+
+##
+# Package
+##
+
+- name: Ensure Nginx is installed
+  become: yes
+  apt: pkg=nginx state=latest update_cache=yes
+  tags: nginx
+
+##
+# Configuration
+##
+- name : Create sites-available folder
+  become: yes
+  file: path=/etc/nginx/sites-available state=directory mode=0755
+  tags: nginx
+
+- name : Create sites-enabled folder
+  become: yes
+  file: path=/etc/nginx/sites-enabled state=directory mode=0755
+  tags: nginx
+
+- name: Generate Diffi Hellman parameters (this could take a long time)
+  become: yes
+  command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048 creates=/etc/nginx/ssl/dhparam.pem
+  tags: nginx
+  notify: Test and Restart Nginx
+
+- name: Ensure Nginx is configured
+  become: yes
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf backup=yes owner=0 group=0 mode=0644
+  tags: nginx
+  notify: Test and Restart Nginx
+
+- name: Ensure Nginx fastcgi_params are configured
+  become: yes
+  template: src=fastcgi_params.j2 dest=/etc/nginx/fastcgi_params backup=yes owner=0 group=0 mode=0644
+  tags: params
+  notify: Test and Restart Nginx
+
+#- name: Ensure Nginx default site is disabled
+#  become: yes
+#  file: path=/etc/nginx/sites-enabled/default state=absent
+#  tags: nginx
+#  notify: Test and Restart Nginx
+
+#- name: Ensure Nginx default site is removed
+#  become: yes
+#  file: path=/etc/nginx/conf.d/default.conf state=absent
+#  tags: nginx
+#  notify: Test and Restart Nginx
+
+##
+# Sites
+##
+- name: Copy Nginx sites
+  become: yes
+  template: src="inventories/{{ env }}/host_files/nginx/sites-available/{{ item }}" dest=/etc/nginx/sites-available/{{ item }} backup=yes
+  with_items:
+    - tuningfork-api
+    - tuningfork-admin
+  tags:
+    - nginx
+    - sites
+  notify: Test and Restart Nginx
+
+- name: Enable Nginx site
+  become: yes
+  file: src=/etc/nginx/sites-available/{{ item }} dest=/etc/nginx/sites-enabled/{{ item }} state=link
+  with_items:
+    - tuningfork-api
+    - tuningfork-admin
+  tags:
+    - nginx
+    - sites
+  notify: Test and Restart Nginx

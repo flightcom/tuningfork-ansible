@@ -1,0 +1,27 @@
+; {{ ansible_managed }}
+
+[program:{{ item.key }}]
+command={{ item.value.command }}
+{% if item.value.redirect_stderr is defined %}redirect_stderr={{ item.value.redirect_stderr }}{% endif %}
+
+{% if item.value.autostart is defined %}autostart={{ item.value.autostart }}{% endif %}
+
+{% if item.value.autorestart is defined %}autorestart={{ item.value.autorestart }}{% endif %}
+
+{% if item.value.user is defined %}user={{ item.value.user }}{% endif %}
+
+{% if item.value.numprocs is defined %}numprocs={{ item.value.numprocs }}{% endif %}
+
+{% if item.value.numprocs is defined and item.value.numprocs > 1 and item.value.process_name is defined %}process_name={{ item.value.process_name }}{% endif %}
+
+{% if item.value.directory is defined %}directory={{ item.value.directory }}{% endif %}
+
+{% if item.value.stopsignal is defined %}stopsignal={{ item.value.stopsignal }}{% endif %}
+
+{% if item.value.socket is defined %}socket={{ item.value.socket }}{% endif %}
+
+{% if item.value.stdout_logfile is defined %}stdout_logfile={{ item.value.stdout_logfile }}{% endif %}
+
+{% if env_vars is defined and env_vars|length > 0 %}
+environment={% for name, value in env_vars.iteritems() %}{{ name }}="{{ value }}"{% if not loop.last %},{% endif %}{% endfor %}
+{% endif %}

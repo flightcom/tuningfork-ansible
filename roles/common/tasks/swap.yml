@@ -1,0 +1,63 @@
+---
+# file: roles/common/tasks/swap.yml
+
+##
+# Swap
+##
+
+- name: Create swapfile
+  become: yes
+  command: dd if=/dev/zero of={{ swap_path }} bs={{ dd_bs_size_mb }}M count={{ swap_count }} creates={{ swap_path }}
+  register: write_swapfile
+  tags:
+    - common
+    - swap
+
+- name: Set swapfile permissions
+  become: yes
+  file: path={{ swap_path }} mode=600
+  tags:
+    - common
+    - swap
+
+- name: Build swapfile
+  become: yes
+  command: mkswap {{ swap_path }}
+  register: create_swapfile
+  when: write_swapfile|changed
+  tags:
+    - common
+    - swap
+
+- name: Enable swapfile
+  become: yes
+  command: swapon {{ swap_path }}
+  when: create_swapfile.changed
+  tags:
+    - common
+    - swap
+
+- name: Add swapfile to /etc/fstab
+  become: yes
+  lineinfile: dest=/etc/fstab line="{{ swap_path }}   none    swap    sw    0   0" state=present
+  tags:
+    - common
+    - swap
+
+- name: Configure swappiness
+  become: yes
+  lineinfile: dest=/etc/sysctl.conf line="vm.swappiness = {{ swappiness }}" regexp="^vm.swappiness[\s]?=" state=present
+  notify: Reload Swap
+  when: swappiness != false
+  tags:
+    - common
+    - swap
+
+- name: Configure vm.vfs_cache_pressure
+  become: yes
+  lineinfile: dest=/etc/sysctl.conf line="vm.vfs_cache_pressure = {{ vfs_cache_pressure }}" regexp="^vm.vfs_cache_pressure[\s]?=" state=present
+  when: vfs_cache_pressure != false
+  notify: Reload Swap
+  tags:
+    - common
+    - swap

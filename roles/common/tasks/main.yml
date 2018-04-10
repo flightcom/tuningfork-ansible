@@ -1,0 +1,71 @@
+---
+# file: roles/common/tasks/main.yml
+
+##
+# Base
+##
+
+- name: Ensure base packages are installed
+  become: yes
+  apt: pkg={{ item }} state=latest update_cache=yes
+  with_items:
+    - aptitude
+    - vim
+    - wget
+    - curl
+    - tree
+    - htop
+    - rsync
+    - git
+    - secure-delete
+  tags: common
+
+- name: Ensure distribution is up-to-date
+  become: yes
+  apt: update_cache=yes upgrade=yes cache_valid_time=1800
+  register: apt_output
+  tags:
+    - common
+    - update
+
+##
+# Locales
+##
+
+- name: Ensure locales are configured
+  become: yes
+  locale_gen: name=en_CA.UTF-8 state=present
+  tags:
+    - commom
+    - locales
+
+##
+# Timezone
+##
+
+- name: Ensure timezone is configured
+  become: yes
+  copy: content="{{ timezone }}\n" dest=/etc/timezone owner=root group=root mode=0644
+  notify: Reconfigure timezone
+  tags:
+    - timezone
+    - common
+
+##
+# NTP
+##
+
+- include: ntp.yml
+
+##
+# SWAP
+##
+
+# - include: swap.yml
+
+
+##
+# Hosts
+##
+
+- include: hosts.yml

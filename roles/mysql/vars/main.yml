@@ -1,0 +1,8 @@
+---
+# file: roles/mysql/vars/main.yml
+# variables associated with this role
+
+mysql_root_user: root
+mysql_production_privileges: ALL
+mysql_read_only_production_privileges: SELECT
+

@@ -1,0 +1,14 @@
+---
+# file: roles/common/handlers/main.yml
+
+- name: Reconfigure timezone
+  become: yes
+  command: dpkg-reconfigure -f noninteractive tzdata
+
+- name: Restart NTP
+  become: yes
+  service: name=ntp state=restarted
+
+- name: Reload Swap
+  become: yes
+  shell: 'swapoff -a && swapon -a'

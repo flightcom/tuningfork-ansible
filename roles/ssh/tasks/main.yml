@@ -1,0 +1,25 @@
+---
+# file: roles/ssh/main.yml
+
+##
+# SSH Server
+##
+
+- name: Ensure Ansible user exist
+  become: yes
+  user: name=ansible shell=/bin/bash comment="Ansible user"
+  tags: ssh
+
+- name: Ensure Ansible user has root access
+  become: yes
+  lineinfile: "dest=/etc/sudoers state=present regexp='^%ansible' line='%ansible ALL=(ALL) NOPASSWD: ALL'"
+  tags: ssh
+
+- name : Ensure Ansible SSH keys are authorized
+  become: yes
+  authorized_key:
+    user: ansible
+    state: present
+    key: "{{ lookup('file', '../../ssh/keys/' + env + '/' + ansible_hostname + '.pub') }}"
+    exclusive: True
+  tags: ssh

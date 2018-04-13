@@ -20,6 +20,6 @@
   authorized_key:
     user: ansible
     state: present
-    key: "{{ lookup('file', '../../ssh/keys/' + env + '/' + ansible_hostname + '.pub') }}"
+    key: "{{ lookup('file', '../../ssh/keys/' + env + '/' + inventory_hostname + '.pub') }}"
     exclusive: True
   tags: ssh

@@ -14,7 +14,7 @@ deploy_dir_admin: '/home/www-tuningfork/www/admin'
 project_repo_api: 'git@github.com:flightcom/tuningfork-api.git'
 project_repo_admin: 'git@github.com:flightocm/tuningfork-admin.git'
 
-project_dependencies:
+project_dependencies: []
 
 # Number of release to keep on server
 release_number_to_keep: 5

@@ -32,26 +32,15 @@
     validate: 'visudo -cf %s'
   tags: project
 
-- name: Ensure users can restart php5-fpm
+- name: Ensure users can restart php7.2-fpm
   become: yes
   lineinfile:
     dest: /etc/sudoers
     state: present
-    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service php5'
-    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service php5-fpm restart'
+    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service php7.2'
+    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service php7.2-fpm restart'
     validate: 'visudo -cf %s'
-  when: php_version is defined and php_version == '5.6'
-  tags: project"
-
-- name: Ensure users can restart php7.0-fpm
-  become: yes
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: '^%{{ web_user }} ALL=\(ALL\) NOPASSWD: /usr/sbin/service php7.0'
-    line: '%{{ web_user }} ALL=(ALL) NOPASSWD: /usr/sbin/service php7.0-fpm restart'
-    validate: 'visudo -cf %s'
-  when: php_version == '7.0' or php_version is undefined
+  when: php_version == '7.2' or php_version is undefined
   tags: project
 
 ##

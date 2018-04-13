@@ -6,7 +6,7 @@ server {
     listen 8000;
     listen [::]:8000;
 
-    root /home/www-tuningfork/www/core/current/public;
+    root /home/www-tuningfork/www/api/current/public;
 
     index index.html index.htm index.php;
 
@@ -20,7 +20,7 @@ server {
 
     location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/var/run/php-fpm-tuningfork-core.sock;
+        fastcgi_pass unix:/var/run/php-fpm-tuningfork-api.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;

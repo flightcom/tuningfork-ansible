@@ -11,4 +11,4 @@ This is a Linux (Ubuntu) machine and it will hold the web server (NGINX) require
 
 It is built through ansible's `web` playbook which is executed in the flow of the `servers` playbook.
 
-The Front-end system can be deployed at any time through the `deploy-front-end` task which is executed in the flow of the `deploy` playbook. Analogously, the Back-end core can be deployed through the `deploy-core` task executed by the same playbook.
+The Front-end system can be deployed at any time through the `deploy-admin` task which is executed in the flow of the `deploy` playbook. Analogously, the Back-end API can be deployed through the `deploy-api` task executed by the same playbook.

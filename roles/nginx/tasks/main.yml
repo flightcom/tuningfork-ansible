@@ -5,6 +5,11 @@
 # Package
 ##
 
+- name: Ensure Apache2 is uninstalled
+  become: yes
+  apt: pkg=apache2 state=absent update_cache=yes purge=yes
+  tags: nginx
+
 - name: Ensure Nginx is installed
   become: yes
   apt: pkg=nginx state=latest update_cache=yes

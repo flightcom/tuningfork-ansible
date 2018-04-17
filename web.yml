@@ -8,5 +8,6 @@
     - fail2ban
     - certbot
     - project
+    - mysql
     - php
     - nginx

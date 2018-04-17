@@ -1,21 +1,26 @@
 ---
-# file: roles/certbot/tasks/main.yml
+- import_tasks: include-vars.yml
 
-##
-# Certbot
-##
-- name: Ensure certbot is installed
+- import_tasks: install-with-package.yml
   become: yes
-  apt: name=certbot state=latest update_cache=yes
-  when: certbot | default(false) | bool
+  when: not certbot_install_from_source
   tags: certbot
 
-- name: Update crontab entry
+- import_tasks: install-from-source.yml
   become: yes
-  lineinfile:
-    dest: /etc/cron.d/certbot
-    line: 0 */12 * * * root test -x /usr/bin/certbot && perl -e 'sleep int(rand(3600))' && certbot -q renew --renew-hook "{{ certbot_renew_hook | default('/usr/sbin/service nginx reload') }}"
-    state: present
-    regexp: "(certbot -q renew)"
-  when: certbot | default(false) | bool
+  when: certbot_install_from_source
+  tags: certbot
+
+- include_tasks: create-cert-standalone.yml
+  become: yes
+  with_items: "{{ certbot_certs }}"
+  when:
+    - certbot_create_if_missing
+    - certbot_create_method == 'standalone'
+  loop_control:
+    loop_var: cert_item
+  tags: certbot
+
+- import_tasks: renew-cron.yml
+  when: certbot_auto_renew
   tags: certbot

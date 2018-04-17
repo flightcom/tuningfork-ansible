@@ -32,7 +32,7 @@
     version: "{{ version_admin | default('master') }}"
     accept_hostkey: yes
     recursive: "{{ project_clone_submodules | default('no') }}"
-    key_file: .ssh/id_rsa_admin
+    key_file: ~/.ssh/id_rsa_admin
 
 - name: Add an unfinished file, to allow cleanup on successful finalize
   file:

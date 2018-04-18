@@ -12,9 +12,12 @@ deploy_user: www-tuningfork
 deploy_dir_api: '/home/www-tuningfork/www/api'
 deploy_dir_admin: '/home/www-tuningfork/www/admin'
 project_repo_api: 'git@github.com:flightcom/tuningfork-api.git'
-project_repo_admin: 'git@github.com:flightocm/tuningfork-admin.git'
+project_repo_admin: 'git@github.com:flightcom/tuningfork-admin.git'
 
-project_dependencies: []
+project_dependencies:
+  - libpng-dev
+
+nodejs_version: "8.x"
 
 # Number of release to keep on server
 release_number_to_keep: 5

@@ -9,5 +9,7 @@
     - certbot
     - project
     - mysql
+    - nodejs
     - php
     - nginx
+    - yarn

@@ -6,4 +6,11 @@
   become_user: "{{ web_user }}"
   roles:
     - deploy-api
+  tags: api
+
+- hosts: web
+  become: yes
+  become_user: "{{ web_user }}"
+  roles:
     - deploy-admin
+  tags: admin

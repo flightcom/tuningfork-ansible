@@ -15,9 +15,9 @@
 ##
 # Check MySQL usernames length
 ##
-- name: Ensure MySQL usernames length is less than 13 characters
-  fail: msg="MySQL username length should be less than 13 characters!"
-  when: item.user | length | int >= 13
+- name: Ensure MySQL usernames length is less than 32 characters
+  fail: msg="MySQL username length should be less than 32 characters!"
+  when: item.user | length | int >= 32
   with_items: "{{ mysql_dbs|default([]) }}"
   tags: mysql
 

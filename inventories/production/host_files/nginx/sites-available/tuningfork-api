@@ -3,8 +3,8 @@
 server {
     server_name api.tuningfork.fr;
 
-    listen 8000;
-    listen [::]:8000;
+    listen 80;
+    listen [::]:80;
 
     root /home/www-tuningfork/www/api/current/public;
 

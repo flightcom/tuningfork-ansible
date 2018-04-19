@@ -16,7 +16,7 @@
 
 - name: Initialize the deploy root directory and gather facts
   deploy_helper:
-    path={{ deploy_dir }}
+    path={{ deploy_dir_api }}
 
 - name: Ensure new release dir exist
   file:
@@ -36,12 +36,12 @@
 
 - name: Clone project
   git:
-    repo: "{{ project_repo }}"
+    repo: "{{ project_repo_api }}"
     dest: "{{ deploy_helper.new_release_path }}"
     version: "{{ version_api | default('master') }}"
     accept_hostkey: yes
     recursive: "{{ project_clone_submodules | default('no') }}"
-    key_file: .ssh/id_rsa_api
+    key_file: ~/.ssh/id_rsa_api
 
 - name: Add an unfinished file, to allow cleanup on successful finalize
   file:
@@ -91,7 +91,7 @@
 
 # This deletes every SQL all backups but the 3 latest
 - name: Clean db backup folder
-  shell: find . -name "*.sql" | sort -r | tail -n +4 | xargs rm
+  shell: find . -name "*.sql" | sort -r | tail -n +4 | xargs -r rm
   args:
     chdir: "{{ deploy_helper.shared_path }}/db-backups"
   ignore_errors: yes
@@ -127,7 +127,7 @@
 
 - name: Finalize the deploy, remove the unfinished file and switch the symlink
   deploy_helper:
-    path={{ deploy_dir }}
+    path={{ deploy_dir_api }}
     release={{ deploy_helper.new_release }}
     state=finalize
     keep_releases={{ release_number_to_keep }}

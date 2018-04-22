@@ -7,14 +7,14 @@ certbot_auto_renew_minute: 30
 certbot_auto_renew_options: "--quiet --no-self-upgrade"
 
 # Parameters used when creating new Certbot certs.
-certbot_create_if_missing: no
+certbot_create_if_missing: yes
 certbot_create_method: standalone
 certbot_admin_email: admin@tuningfork.fr
 certbot_certs:
-  domains:
+  - domains:
+    - www.tuningfork.fr
     - admin.tuningfork.fr
     - api.tuningfork.fr
-    - www.tuningfork.fr
 certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --agree-tos --email {{ cert_item.email | default(certbot_admin_email) }} -d {{ cert_item.domains | join(',') }}"
 certbot_create_standalone_stop_services:
   - nginx

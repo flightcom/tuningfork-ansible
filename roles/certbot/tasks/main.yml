@@ -1,5 +1,7 @@
 ---
+
 - import_tasks: include-vars.yml
+  tags: certbot
 
 - import_tasks: install-with-package.yml
   become: yes
@@ -22,5 +24,6 @@
   tags: certbot
 
 - import_tasks: renew-cron.yml
+  become: yes
   when: certbot_auto_renew
   tags: certbot

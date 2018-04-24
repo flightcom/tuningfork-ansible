@@ -12,10 +12,11 @@ certbot_create_method: standalone
 certbot_admin_email: admin@tuningfork.fr
 certbot_certs:
   - domains:
-    - www.tuningfork.fr
+    - tuningfork.fr
     - admin.tuningfork.fr
     - api.tuningfork.fr
-certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --agree-tos --email {{ cert_item.email | default(certbot_admin_email) }} -d {{ cert_item.domains | join(',') }}"
+    - www.tuningfork.fr
+certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --expand --agree-tos --email {{ cert_item.email | default(certbot_admin_email) }} -d {{ cert_item.domains | join(',') }}"
 certbot_create_standalone_stop_services:
   - nginx
 

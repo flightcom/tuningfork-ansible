@@ -9,10 +9,14 @@ php_pool: www-tuningfork
 # Project
 ##
 deploy_user: www-tuningfork
+
 deploy_dir_api: '/home/www-tuningfork/www/api'
 deploy_dir_admin: '/home/www-tuningfork/www/admin'
+deploy_dir_landing: '/home/www-tuningfork/www/landing'
+
 project_repo_api: 'git@github.com:flightcom/tuningfork-api.git'
 project_repo_admin: 'git@github.com:flightcom/tuningfork-admin.git'
+project_repo_landing: 'git@github.com:flightcom/tuningfork-landingpage.git'
 
 project_dependencies:
   - libpng-dev

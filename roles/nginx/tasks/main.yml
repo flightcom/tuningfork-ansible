@@ -67,6 +67,7 @@
   with_items:
     - tuningfork-api
     - tuningfork-admin
+    - tuningfork-landing
   tags:
     - nginx
     - sites
@@ -78,6 +79,7 @@
   with_items:
     - tuningfork-api
     - tuningfork-admin
+    - tuningfork-landing
   tags:
     - nginx
     - sites

@@ -14,3 +14,10 @@
   roles:
     - deploy-admin
   tags: admin
+
+- hosts: web
+  become: yes
+  become_user: "{{ web_user }}"
+  roles:
+    - deploy-landing
+  tags: landing

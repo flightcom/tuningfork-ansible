@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+
+server {
+    listen 80; # managed by Certbot
+    listen [::]:80;
+
+    server_name tuningfork.fr www.tuningfork.fr;
+    root /home/www-tuningfork/www/landing/current/_site;
+
+    return 301 https://tuningfork.fr$request_uri;
+}
+
+server {
+	listen 443 ssl; # managed by Certbot
+	listen [::]:443 ssl;
+
+	ssl_certificate /etc/letsencrypt/live/www.tuningfork.fr/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/www.tuningfork.fr/privkey.pem;
+	ssl_trusted_certificate /etc/letsencrypt/live/www.tuningfork.fr/fullchain.pem;
+
+    server_name tuningfork.fr www.tuningfork.fr;
+
+    root /home/www-tuningfork/www/landing/current/_site;
+
+    index index.html index.htm;
+
+    charset utf-8;
+
+    client_max_body_size 32M;
+
+    ##
+    # Referrer Policy
+    ##
+    add_header Referrer-Policy "no-referrer";
+
+    location / {
+        try_files $uri $uri/ /index.html?$query_string;
+    }
+
+    location = /robots.txt  {
+        try_files $uri $uri/ /index.php?$query_string;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Log configuration
+    access_log /var/log/nginx/tuningfork-landing_access.log;
+    error_log /var/log/nginx/tuningfork-landing_error.log;
+}

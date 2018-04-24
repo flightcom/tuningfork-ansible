@@ -1,0 +1,35 @@
+---
+
+- name: Installing pre-reqs
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - build-essential
+    - ruby
+    - ruby-dev
+    - ruby2.3-dev
+    - jekyll
+  tags: jekyll
+
+# - name: Setting user folder
+#   become: yes
+#   lineinfile:
+#     path: ~/.bashrc
+#     line: "{{ item }}"
+#   with_items:
+#     - export GEM_HOME=$HOME/.gems
+#     - export PATH=$HOME/.gems/bin:$PATH
+#   tags: jekyll
+
+# - name: Installing Ruby Gems
+#   become: yes
+#   become_user: "{{ web_user }}"
+#   gem:
+#     name: "{{ item }}"
+#     state: present
+#   with_items:
+#     - jekyll
+#     - bundler
+#   tags: jekyll
